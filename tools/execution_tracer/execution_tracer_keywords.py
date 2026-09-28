@@ -58,3 +58,27 @@ def validate_symbol_lookup_slice(trace_lines: list[str], slice_start: int, slice
                         f"Expected pattern: '{pattern.pattern}'"
                     )
                 break
+
+
+def _execute_command(command: str) -> str:
+    from robot.libraries.BuiltIn import BuiltIn
+    return BuiltIn().run_keyword("Execute Command", command)
+
+
+def start_testwise_trace(cpu_name: str, test_name: str, trace_dir: str) -> None:
+    """Start execution tracing for a specific test.
+
+    Creates a uniquely-named trace file per test. Called from test setup.
+    """
+    _execute_command(
+        f'{cpu_name} CreateExecutionTracing "{test_name}" '
+        f'@{trace_dir}/{test_name}__cpu.trace.bin.gz PC isBinary=True compress=True'
+    )
+
+
+def stop_testwise_trace(cpu_name: str) -> None:
+    """Stop execution tracing for the current test.
+
+    Called from test teardown.
+    """
+    _execute_command(f"{cpu_name} DisableExecutionTracing")
