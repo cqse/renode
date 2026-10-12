@@ -292,6 +292,13 @@ def install_cli_arguments(parser):
                         default=False,
                         help="Gather execution metrics for each suite.")
 
+    parser.add_argument("--testwise-coverage",
+                        dest="testwise_coverage",
+                        action="store",
+                        default=None,
+                        type=os.path.abspath,
+                        help="Record the guest code executed by each test into this directory (testwise coverage).")
+
     parser.add_argument("--test-timeout",
                         dest="timeout",
                         action="store",
@@ -1076,6 +1083,8 @@ class RobotTestSuite(object):
             variables.append('HOLD_ON_ERROR:True')
         if options.execution_metrics:
             variables.append('CREATE_EXECUTION_METRICS:True')
+        if options.testwise_coverage:
+            variables.append('TESTWISE_COVERAGE_DIR:{}'.format(options.testwise_coverage))
         if options.save_logs == "always":
             variables.append('SAVE_LOGS_WHEN:Always')
 
