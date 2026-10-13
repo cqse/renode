@@ -23,6 +23,7 @@ ${SAVE_LOGS}                 True
 ${SAVE_LOGS_WHEN}            Fail
 ${HOLD_ON_ERROR}             False
 ${CREATE_EXECUTION_METRICS}  False
+${TESTWISE_COVERAGE_DIR}     ${EMPTY}
 ${PROFILER_PROCESS}          None
 
 *** Keywords ***
@@ -73,6 +74,10 @@ Setup Renode
 
     IF      ${CREATE_EXECUTION_METRICS}
         Execute Command    EnableProfilerGlobally "${metrics_path}"
+    END
+
+    IF      '${TESTWISE_COVERAGE_DIR}' != '${EMPTY}'
+        Execute Command    EnableTestwiseCoverageGlobally "${TESTWISE_COVERAGE_DIR}"
     END
 
     Reset Emulation
@@ -132,6 +137,10 @@ Test Setup
     Reset Emulation
     Set Crash On Abort  True
 
+    IF  '${TESTWISE_COVERAGE_DIR}' != '${EMPTY}'
+        Execute Command  TestwiseCoverage BeginTest "${SUITE NAME}" "${TEST NAME}"
+    END
+
 Print Log Saved Message
     Return From Keyword If   'skipped' in @{TEST TAGS}
     Return From Keyword If    not ${SAVE_LOGS}
@@ -147,6 +156,11 @@ Remove Log
     Remove File  ${log_path}
 
 Test Teardown
+    # First, while the test's machines still exist (their loaded images are part of the record).
+    IF  '${TESTWISE_COVERAGE_DIR}' != '${EMPTY}'
+        Execute Command  TestwiseCoverage EndTest "${TEST STATUS}"
+    END
+
     Stop Profiler
 
     ${failed}=  Run Keyword If Test Failed  Set Variable  True
